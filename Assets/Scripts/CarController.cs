@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CarController : MonoBehaviour
 {
@@ -55,9 +56,7 @@ public class CarController : MonoBehaviour
         {
             Decelerate();
         }
-
-        Debug.Log($"My current position is : Ymodifier = {yModifier}\r\nXmodifier = {xModifier}\r\nVelocity={_rb.velocity}");
-
+        UpdateDebugInformation();
     }
 
     private void Accelerate()
@@ -81,4 +80,37 @@ public class CarController : MonoBehaviour
         //todo1-notes: breaking should not take into account direction of vehicle, only direction of inertia
         _rb.AddForce(new Vector2(BrakingPower * -xModifier * Time.deltaTime, BrakingPower * -yModifier * Time.deltaTime));
     }
+
+    #region UI
+
+    public Text CurrentVelocityText = null;
+    public Text CurrentXModifierText = null;
+    public Text CurrentYModifierText = null;
+    public Text IsAcceleratingText = null;
+    public Text IsBrakingText = null;
+
+    private void UpdateDebugInformation() 
+    {
+        string CurrentVelocityText = $"Velocity = {_rb.velocity.magnitude}";
+        if (this.CurrentVelocityText.text != CurrentVelocityText) { 
+            this.CurrentVelocityText.text = CurrentVelocityText;
+        }
+
+        string CurrentXModifierText = $"X modifier = {this.xModifier}";
+        if (this.CurrentXModifierText.text != CurrentXModifierText)
+        {
+            this.CurrentXModifierText.text = CurrentXModifierText;
+        }
+
+        string CurrentYModifierText = $"Y modifier = {this.yModifier}";
+        if (this.CurrentYModifierText.text != CurrentYModifierText)
+        {
+            this.CurrentYModifierText.text = CurrentYModifierText;
+        }
+
+        IsAcceleratingText.color = Accelerating ? Color.green : Color.gray;
+        IsBrakingText.color = Braking ? Color.red : Color.gray;
+    }
+
+    #endregion
 }
