@@ -78,7 +78,15 @@ public class CarController : MonoBehaviour
     {
         //todo1: fix exploit of breaking being faster than going forward.
         //todo1-notes: breaking should not take into account direction of vehicle, only direction of inertia
-        _rb.AddForce(new Vector2(BrakingPower * -xModifier * Time.deltaTime, BrakingPower * -yModifier * Time.deltaTime));
+        if (_rb.velocity.y > 0)
+        {
+            _rb.AddForce(new Vector2(BrakingPower * -xModifier * Time.deltaTime,
+                BrakingPower * -yModifier * Time.deltaTime));
+        }
+        else
+        {
+            _rb.velocity =  Vector2.zero;
+        }
     }
 
     #region UI
