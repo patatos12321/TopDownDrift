@@ -7,7 +7,8 @@ using UnityEngine.UI;
 public class CarController : MonoBehaviour
 {
     public bool Accelerating { get; private set; }
-    public bool Braking { get;  private set; }
+    public bool Braking { get; private set; }
+    public bool Turning { get; private set; }
     public float MaxVelocity = 100000;
     //Direction of the front of the vehicle for the y axis. 1 means pointing totally upwards. -1 means pointing totally downwards.
     public float yModifier = 1;
@@ -16,6 +17,8 @@ public class CarController : MonoBehaviour
 
     public int Horsepower = 1500;
     public int BrakingPower = 6000;
+    //Lower TurningRate is better. Represents the amount of fixed updates needed to complete a quarter of a turn at low speed.
+    public int TurningRate = 600;
 
     private Rigidbody2D _rb;
 
@@ -28,26 +31,14 @@ public class CarController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            Accelerating = true;
-        }
-        else if (Input.GetKeyUp(KeyCode.UpArrow))
-        {
-            Accelerating = false;
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            Braking = true;
-        }
-        else if (Input.GetKeyUp(KeyCode.DownArrow))
-        {
-            Braking = false;
-        }
+        Accelerating = Input.GetKey(KeyCode.UpArrow);
+        Braking = Input.GetKey(KeyCode.DownArrow);
+        Turning = Input.GetKey(KeyCode.LeftArrow) ^ Input.GetKey(KeyCode.RightArrow); //one or the other, not both
     }
 
     void FixedUpdate()
     {
+        //Order of operation is important
         if (Accelerating)
         {
             Accelerate();
@@ -55,6 +46,9 @@ public class CarController : MonoBehaviour
         if (Braking)
         {
             Decelerate();
+        }
+        if (Turning) {
+            Turn();
         }
         UpdateDebugInformation();
     }
@@ -81,6 +75,35 @@ public class CarController : MonoBehaviour
         _rb.AddForce(new Vector2(BrakingPower * -xModifier * Time.deltaTime, BrakingPower * -yModifier * Time.deltaTime));
     }
 
+    private void Turn()
+    {
+        if (_rb.velocity.magnitude == 0) return;
+
+        //separate the 360 degrees into x segments, where x is the turning rate
+        float rotation = 1f / TurningRate;
+        if (Input.GetKey(KeyCode.LeftArrow)) // there's no reason to chose right as the default instead of left, I just had to pick one
+        {
+            rotation = -rotation;
+        }
+        
+        //turning right makes the front of the car aim leftwards when the ymodifier is negative (since we're aiming down, turning right goes left)
+        xModifier += yModifier < 0 ? rotation : -rotation;
+        //turning right makes the front of the car aim upwards when the xmodifier is negative (since we're looking left, turning right goes up)
+        //"                                      " aim downwards when the xmodifier is positive (since we're looking right, turning right does down)
+        yModifier += xModifier < 0 ? rotation : -rotation;
+
+
+        //ensure values are between 1 and -1
+        xModifier = Math.Max(Math.Min(xModifier, 1), -1);
+        yModifier = Math.Max(Math.Min(yModifier, 1), -1);
+
+        var newZRotation = yModifier * 360;
+        if (xModifier < 0)
+            newZRotation = -newZRotation;
+
+        this.transform.rotation = Quaternion.Euler(0,0,newZRotation);
+    }
+
     #region UI
 
     public Text CurrentVelocityText = null;
@@ -89,10 +112,11 @@ public class CarController : MonoBehaviour
     public Text IsAcceleratingText = null;
     public Text IsBrakingText = null;
 
-    private void UpdateDebugInformation() 
+    private void UpdateDebugInformation()
     {
         string CurrentVelocityText = $"Velocity = {_rb.velocity.magnitude}";
-        if (this.CurrentVelocityText.text != CurrentVelocityText) { 
+        if (this.CurrentVelocityText.text != CurrentVelocityText)
+        {
             this.CurrentVelocityText.text = CurrentVelocityText;
         }
 
