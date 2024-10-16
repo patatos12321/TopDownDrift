@@ -100,24 +100,26 @@ public class CarController : MonoBehaviour
     private void UpdateDebugInformation() 
     {
         string CurrentVelocityText = $"Velocity = {_rb.velocity.magnitude}";
-        if (this.CurrentVelocityText.text != CurrentVelocityText) { 
+        if (this.CurrentVelocityText!= null && this.CurrentVelocityText.text != CurrentVelocityText) { 
             this.CurrentVelocityText.text = CurrentVelocityText;
         }
 
         string CurrentXModifierText = $"X modifier = {this.xModifier}";
-        if (this.CurrentXModifierText.text != CurrentXModifierText)
+        if (this.CurrentXModifierText != null && this.CurrentXModifierText.text != CurrentXModifierText)
         {
             this.CurrentXModifierText.text = CurrentXModifierText;
         }
 
         string CurrentYModifierText = $"Y modifier = {this.yModifier}";
-        if (this.CurrentYModifierText.text != CurrentYModifierText)
+        if (this.CurrentYModifierText != null && this.CurrentYModifierText.text != CurrentYModifierText)
         {
             this.CurrentYModifierText.text = CurrentYModifierText;
         }
 
-        IsAcceleratingText.color = Accelerating ? Color.green : Color.gray;
-        IsBrakingText.color = Braking ? Color.red : Color.gray;
+        if (IsAcceleratingText !=null)
+            IsAcceleratingText.color = Accelerating ? Color.green : Color.gray;
+        if (IsBrakingText != null)
+            IsBrakingText.color = Braking ? Color.red : Color.gray;
     }
 
     #endregion
