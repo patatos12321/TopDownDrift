@@ -71,21 +71,21 @@ public class CarController : MonoBehaviour
 
     private bool IsAtMaxSpeed()
     {
-        return _rb.velocity.magnitude > MaxVelocity;
+        return _rb.linearVelocity.magnitude > MaxVelocity;
     }
 
     private void Decelerate()
     {
         //todo1: fix exploit of breaking being faster than going forward.
         //todo1-notes: breaking should not take into account direction of vehicle, only direction of inertia
-        if (_rb.velocity.y > 0)
+        if (_rb.linearVelocity.y > 0)
         {
             _rb.AddForce(new Vector2(BrakingPower * -xModifier * Time.deltaTime,
                 BrakingPower * -yModifier * Time.deltaTime));
         }
         else
         {
-            _rb.velocity =  Vector2.zero;
+            _rb.linearVelocity =  Vector2.zero;
         }
     }
 
@@ -99,7 +99,7 @@ public class CarController : MonoBehaviour
 
     private void UpdateDebugInformation() 
     {
-        string CurrentVelocityText = $"Velocity = {_rb.velocity.magnitude}";
+        string CurrentVelocityText = $"Velocity = {_rb.linearVelocity.magnitude}";
         if (this.CurrentVelocityText!= null && this.CurrentVelocityText.text != CurrentVelocityText) { 
             this.CurrentVelocityText.text = CurrentVelocityText;
         }
